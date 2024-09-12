@@ -1,6 +1,11 @@
 <?php
 require_once('dbconnection.php');
-$query_users = "SELECT * FROM users ";
+$data=0;
+if(isset($_POST['data'])){
+    $data = intval($_POST['data']);
+}
+
+$query_users = "SELECT * FROM users WHERE id>1";
 $result_users = mysqli_query($con, $query_users);
 
 $query_flights = "SELECT * FROM flights";
@@ -29,12 +34,12 @@ $result_bookings = mysqli_query($con, $query_bookings);
 <body>
     <header id="header" class="fixed-top bg-light">
         <div class="container">
-            <h1 class="logo me-auto"><a href="index.html">AHR Airlines</a></h1>
+            <h1 class="logo me-auto"><a href="login.html">AHR Airlines</a></h1>
             <!-- Navbar -->
             <nav class="navbar navbar-expand-lg navbar-light bg-light">
                 <a class="navbar-brand" href="#">Home</a>
                 <a class="navbar-brand" href="login.html">Logout</a>
-                
+
                 <button class="navbar-toggler" type="button" data-toggle="collapse"
                     data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
                     aria-label="Toggle navigation">
@@ -56,10 +61,12 @@ $result_bookings = mysqli_query($con, $query_bookings);
                     <th scope="col">ID</th>
                     <th scope="col">Name</th>
                     <th scope="col">Email</th>
+                    <th scope="col">Delete</th>
                 </tr>
             </thead>
             <tbody>
                 <?php
+                $serial = 1;
                 while ($row = mysqli_fetch_assoc($result_users)) {
                 ?>
                     <tr>
@@ -71,48 +78,53 @@ $result_bookings = mysqli_query($con, $query_bookings);
                         </td>
                         <td>
                             <?php echo $row['email'] ?>
+                        <td>
+                            <form method="post" action="delete_user.php">
+                                <input type="hidden" name="data" value="<?php echo htmlspecialchars($data) ?>">
+                                <input type="hidden" name="user_id" value="<?php echo htmlspecialchars($row['id']) ?>">
+                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                            </form>
                         </td>
                     </tr>
                 <?php
+                    $serial++;
                 }
                 ?>
-
-
             </tbody>
         </table>
     </div>
 
     <div class="container mt-5 pt-5">
-    <h3 class="mt-5">Flights</h3>
-    <table class="table table-primary">
-        <thead>
-            <tr>
-                <th scope="col">ID</th>
-                <th scope="col">Date</th>
-                <th scope="col">Destination</th>
-                <th scope="col">Departure</th>
-                <th scope="col">Seat</th>
-            </tr>
-        </thead>
-        <tbody>
-        <?php
-            if ($result_flights->num_rows > 0) {
-                while ($row = mysqli_fetch_assoc($result_flights)) {
-                    echo "<tr>";
-                    echo "<th scope='row'>" . $row['id'] . "</th>";
-                    echo "<td>" . $row['date'] . "</td>";
-                    echo "<td>" . $row['destination'] . "</td>";
-                    echo "<td>" . $row['departure'] . "</td>";
-                    echo "<td>" . $row['seat'] . "</td>";
-                    echo "</tr>";
+        <h3 class="mt-5">Flights</h3>
+        <table class="table table-primary">
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Date</th>
+                    <th scope="col">Destination</th>
+                    <th scope="col">Departure</th>
+                    <th scope="col">Seat</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                if ($result_flights->num_rows > 0) {
+                    while ($row = mysqli_fetch_assoc($result_flights)) {
+                        echo "<tr>";
+                        echo "<th scope='row'>" . $row['id'] . "</th>";
+                        echo "<td>" . $row['date'] . "</td>";
+                        echo "<td>" . $row['destination'] . "</td>";
+                        echo "<td>" . $row['departure'] . "</td>";
+                        echo "<td>" . $row['seat'] . "</td>";
+                        echo "</tr>";
+                    }
+                } else {
+                    echo "<tr><td colspan='5'>No flights available.</td></tr>";
                 }
-            } else {
-                echo "<tr><td colspan='5'>No flights available.</td></tr>";
-            }
-        ?>
-        </tbody>
-    </table>
-</div>
+                ?>
+            </tbody>
+        </table>
+    </div>
 
     <div class="container mt-5 pt-5">
         <h3 class="mt-5">Bookings</h3>
@@ -153,7 +165,7 @@ $result_bookings = mysqli_query($con, $query_bookings);
                             <?php echo $row['date'] ?>
                         </td>
                     </tr>
-                    <?php
+                <?php
                     $serial++;
                 }
                 ?>
